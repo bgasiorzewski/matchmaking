@@ -14,16 +14,16 @@ type HotslogsPlayer = Int64
 type HotslogsMatch = Int64
 
 data Match = Match
-    { hotslogs_match :: HotslogsMatch
-    , time_played :: UTCTime
-    , mmr_high :: Int32
-    , mmr_low :: Int32
-    , name_high :: Text
-    , name_low :: Text
-    , region :: Region
+    { hotslogs_match :: !HotslogsMatch
+    , time_played :: !UTCTime
+    , mmr_high :: !Int32
+    , mmr_low :: !Int32
+    , name_high :: !Text
+    , name_low :: !Text
+    , region :: !Region
     } deriving Show
 
-data GlobalPlace = GlobalPlace Place Region
+data GlobalPlace = GlobalPlace !Place !Region
     deriving (Show, Eq, Ord, Bounded)
 
 instance Enum GlobalPlace where
@@ -52,7 +52,7 @@ instance Enum Place where
 
 type Grandmasters = Map GlobalPlace HotslogsPlayer
 
-data Task = FetchGrandmasters Region Int | FetchLastMatch GlobalPlace
+data Task = FetchGrandmasters !Region | FetchLastMatch !GlobalPlace
     deriving Show
 
 gmSize :: Int

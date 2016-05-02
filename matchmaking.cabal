@@ -13,7 +13,7 @@ executable matchmaking
     Matchmaking.App,
     Matchmaking.Common,
     Matchmaking.Scraper
-  ghc-options: -Wall -with-rtsopts=-T -threaded
+  ghc-options: -Wall -with-rtsopts=-T -threaded -O
   extensions: OverloadedStrings
   build-depends:
     base,
