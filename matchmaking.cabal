@@ -1,0 +1,31 @@
+name:          matchmaking
+version:       0.1
+license:       AllRightsReserved
+author:        Bartek Gąsiorzewski
+synopsis:      ismatchmakingfixedyet.com
+cabal-version: >= 1.8
+build-type:    Simple
+description:   ismatchmakingfixedyet.com
+
+executable matchmaking
+  main-is: matchmaking.hs
+  other-modules:
+    Matchmaking.App,
+    Matchmaking.Common,
+    Matchmaking.Scraper
+  ghc-options: -Wall -with-rtsopts=-T -threaded
+  extensions: OverloadedStrings
+  build-depends:
+    base,
+    blaze-html,
+    bytestring,
+    containers,
+    ekg,
+    ekg-core,
+    http-client,
+    postgresql-simple,
+    scotty,
+    tagsoup,
+    text,
+    time,
+    transformers
