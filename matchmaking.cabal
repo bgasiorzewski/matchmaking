@@ -12,6 +12,7 @@ executable matchmaking
   other-modules:
     Matchmaking.App,
     Matchmaking.Common,
+    Matchmaking.DB,
     Matchmaking.Scraper
   ghc-options: -Wall -with-rtsopts=-T -threaded -O
   extensions: OverloadedStrings
@@ -23,6 +24,7 @@ executable matchmaking
     ekg,
     ekg-core,
     http-client,
+    http-types,
     postgresql-simple,
     scotty,
     tagsoup,

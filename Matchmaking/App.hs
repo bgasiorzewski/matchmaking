@@ -21,7 +21,9 @@ answer np na
     | otherwise = fixed
     where
     ratio = toEnum np / toEnum na
-    detail = H.p (fromString $ "In " ++ show ratio ++ "% of high level matches the difference between best and worst player exceeds 1000 hotdogs.")
+    percentage :: Int
+    percentage = round $ 100 * ratio
+    detail = H.p (fromString $ "In " ++ show percentage ++ "% of high level matches played during prime time the difference between best and worst player exceeds 1000 hotdogs.")
     broken = H.p "NO, matchmaking is still broken" >> detail
     fixed = H.p "YES, matchmaking is working well" >> detail
 

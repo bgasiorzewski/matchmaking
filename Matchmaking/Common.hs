@@ -2,13 +2,20 @@ module Matchmaking.Common where
 
 import Data.Int
 import Data.IORef
-import Data.Map (Map)
+import Data.Map.Strict (Map)
 import Data.Text (Text)
 import Data.Time
+import Database.PostgreSQL.Simple
+import Database.PostgreSQL.Simple.ToField
+import Database.PostgreSQL.Simple.ToRow
 import System.IO.Unsafe
 
 data Region = NA | EU
     deriving (Show, Eq, Ord, Bounded, Enum)
+
+instance ToField Region where
+    toField NA = toField (1 :: Int32)
+    toField EU = toField (2 :: Int32)
 
 type HotslogsPlayer = Int64
 type HotslogsMatch = Int64
@@ -23,7 +30,18 @@ data Match = Match
     , region :: !Region
     } deriving Show
 
-data GlobalPlace = GlobalPlace !Place !Region
+instance ToRow Match where
+    toRow (Match hm tp mh ml nh nl r) =
+        [ toField hm
+        , toField tp
+        , toField mh
+        , toField ml
+        , toField nh
+        , toField nl
+        , toField r
+        ]
+
+data GlobalPlace = GlobalPlace { gpPlace :: !Place, gpRegion :: !Region }
     deriving (Show, Eq, Ord, Bounded)
 
 instance Enum GlobalPlace where
@@ -56,7 +74,7 @@ data Task = FetchGrandmasters !Region | FetchLastMatch !GlobalPlace
     deriving Show
 
 gmSize :: Int
-gmSize = 200
+gmSize = 100
 
 nRegions :: Int
 nRegions = 2
