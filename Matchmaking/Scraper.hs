@@ -29,7 +29,6 @@ scraper conn tasks = do
     manager <- newManager $ defaultManagerSettings { managerModifyRequest = addHeaders }
     forM_ tasks $ \task -> do
         putStrLn $ "scraping " ++ show task
-        gms' <- readIORef gms
         catches (handleTask manager conn task)
             [ Handler $ \e -> putException (e :: ErrorCall)
             , Handler $ \e -> putException (e :: HttpException)
@@ -68,7 +67,7 @@ extractPlayers = map shapeshift . sections rowPred . parseTags
     rowPred tag =
         tag ~== ("<tr class='rgRow'>" :: String) ||
         tag ~== ("<tr class='rgAltRow'>" :: String)
-    shapeshift = tt2integral . head . drop 3
+    shapeshift = tt2integral . (!! 3)
 
 reg2hreg :: Region -> S.ByteString
 reg2hreg NA = "1"
@@ -132,7 +131,7 @@ extractMatch hMatch reg played lbs = Match hMatch played mh ml nh nl reg
     (ml, nl) = head players
     players = sort . map extractSingle $ rowTags
     entryPoint = dropWhile (~/= ("<td colspan='13'>" :: String)) . parseTags $ lbs
-    allTags = sections (~== ("<td class='rgGroupCol'>" :: String)) $ entryPoint
+    allTags = sections (~== ("<td class='rgGroupCol'>" :: String)) entryPoint
     rowTags = take 5 allTags ++ take 5 (drop 6 allTags)
     extractSingle rowTag = (tt2integral $ getHotdogs rowTag, tt2text $ getName rowTag)
     getName = head . dropWhile (not . isTagText) . drop 4

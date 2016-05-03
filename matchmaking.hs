@@ -4,6 +4,7 @@ import Control.Concurrent
 import Data.IORef
 import Data.Maybe
 import Database.PostgreSQL.Simple
+import Network.Wai.Handler.Warp
 import System.Environment
 import System.Metrics
 import System.Remote.Monitoring
@@ -38,13 +39,15 @@ main = do
     conn <- connectPostgreSQL "user=matchmaking dbname=matchmaking"
     _ <- forkIO $ scraper conn tasks
     let auxRaw = zip (lines $! auxIdsRaw) (lines $! auxDatesRaw)
-    let auxTasks = catMaybes $ map mkAux auxRaw
+    let auxTasks = mapMaybe mkAux auxRaw
     putStrLn $ "Aux scrape queue size (assuming EU region): " ++ show (length auxTasks)
     auxConn <- connectPostgreSQL "user=matchmaking dbname=matchmaking"
     _ <- forkIO $ scraper auxConn auxTasks
     -- set up scotty
-    scotty 3000 $ get "/" $ rootApp
+    scottyOpts scottySettings $ get "/" rootApp
     where
+    scottySettings = Options 0 warpSettings
+    warpSettings = setHost "127.0.0.1" $ setPort 3000 $ defaultSettings
     fallbackyEntry s = maybe minBound toEnum $ readMaybe s
     mkAux (idRaw, dateRaw) = do
         hMatch <- readMaybe idRaw

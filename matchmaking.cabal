@@ -30,4 +30,5 @@ executable matchmaking
     tagsoup,
     text,
     time,
-    transformers
+    transformers,
+    warp
