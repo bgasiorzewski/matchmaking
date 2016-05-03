@@ -28,9 +28,8 @@ scraper :: Connection -> [Task] -> IO ()
 scraper conn tasks = do
     manager <- newManager $ defaultManagerSettings { managerModifyRequest = addHeaders }
     forM_ tasks $ \task -> do
-        putStrLn $ "scraping! " ++ show task
+        putStrLn $ "scraping " ++ show task
         gms' <- readIORef gms
-        putStrLn $ "gms: " ++ show (M.size gms')
         catches (handleTask manager conn task)
             [ Handler $ \e -> putException (e :: ErrorCall)
             , Handler $ \e -> putException (e :: HttpException)
@@ -54,14 +53,11 @@ handleTask manager _ (FetchGrandmasters reg) = do
     updatePlayers reg players
 handleTask manager conn (FetchLastMatch gp) = do
     (lastMatchId, played) <- extractMatchId <$> fetchHistory manager gp
-    putStrLn $ "match id " ++ show (lastMatchId, played)
     present <- matchPresent conn lastMatchId
-    putStrLn $ "present " ++ show present
     unless present $ handleTask manager conn (FetchMatch (gpRegion gp) played lastMatchId)
 handleTask manager conn (FetchMatch reg played hMatch) = do
     matchHtml <- fetchMatch manager hMatch
     let lastMatch = extractMatch hMatch reg played matchHtml
-    putStrLn $ "match " ++ show hMatch
     insertMatch conn lastMatch
 
 -- all the extract* functions are very susceptible to changes in Hotslogs HTML
