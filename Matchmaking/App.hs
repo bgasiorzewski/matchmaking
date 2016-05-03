@@ -50,10 +50,8 @@ rootApp = do
         H.body $ do
             H.h1 "Is Hero League matchmaking for Heroes of the Storm fixed yet?"
             answer nPotato nAll
-            H.footer $ do
-                "Created by "
-                H.a "Bartek Gąsiorzewski"
-                    ! A.href "https://github.com/HotChick91/matchmaking"
+            H.footer $ H.a "Created by Bartek Gąsiorzewski"
+                ! A.href "https://github.com/HotChick91/matchmaking"
             H.script $ mconcat
                 [ "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){"
                 , "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),"
