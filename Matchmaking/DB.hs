@@ -10,7 +10,7 @@ import Control.Monad
 
 import Matchmaking.Common
 
--- TODO: check for prime time
+-- consider checking for prime time
 usQ :: Query
 usQ = mconcat
     [ "SELECT "

@@ -2,6 +2,7 @@ module Matchmaking.Scraper (scraper) where
 
 import Control.Monad
 import Control.Concurrent
+import Control.Exception
 import Data.IORef
 import Data.List
 import Data.Map ((!))
@@ -30,17 +31,22 @@ scraper conn tasks = do
         putStrLn $ "scraping! " ++ show task
         gms' <- readIORef gms
         putStrLn $ "gms: " ++ show (M.size gms')
-        -- TODO: catch all errors in this (ErrorCall, HttpException, SqlError)
-        handleTask manager conn task
-        -- TODO: catch errors here as well (SqlError)
-        updateStats conn
+        catches (handleTask manager conn task)
+            [ Handler $ \e -> putException (e :: ErrorCall)
+            , Handler $ \e -> putException (e :: HttpException)
+            , Handler $ \e -> putException (e :: SqlError)
+            ]
+        catch (updateStats conn) $ \e -> putException (e :: SqlError)
         threadDelay $ 60 * 1000 * 1000
     where
-    -- TODO: add user agent
     addHeaders r = return $ r
-        { requestHeaders = (hAcceptLanguage, "en-US,en") : requestHeaders r
+        { requestHeaders
+            = (hAcceptLanguage, "en-US,en")
+            : (hUserAgent, "Matchmaking/1.0 (+http://www.ismatchmakingfixedyet.com)")
+            : requestHeaders r
         , cookieJar = Nothing
         }
+    putException e = putStrLn $ "updateStats error'd: " ++ show e
 
 handleTask :: Manager -> Connection -> Task -> IO ()
 handleTask manager _ (FetchGrandmasters reg) = do
@@ -52,11 +58,12 @@ handleTask manager conn (FetchLastMatch gp) = do
     putStrLn $ "match id " ++ show (lastMatchId, played)
     present <- matchPresent conn lastMatchId
     putStrLn $ "present " ++ show present
-    unless present $ do
-        matchHtml <- fetchMatch manager lastMatchId
-        let lastMatch = extractMatch lastMatchId (gpRegion gp) played matchHtml
-        putStrLn $ "match " ++ show lastMatch
-        insertMatch conn lastMatch
+    unless present $ handleTask manager conn (FetchMatch (gpRegion gp) played lastMatchId)
+handleTask manager conn (FetchMatch reg played hMatch) = do
+    matchHtml <- fetchMatch manager hMatch
+    let lastMatch = extractMatch hMatch reg played matchHtml
+    putStrLn $ "match " ++ show hMatch
+    insertMatch conn lastMatch
 
 -- all the extract* functions are very susceptible to changes in Hotslogs HTML
 -- an API would be a godsend
@@ -112,7 +119,7 @@ extractMatchId lbs = (tt2integral $ head matchIdTags, tt2date $ head dateTags)
     skip = dropWhile (~/= ("<tr id='__0'>" :: String))
     matchIdTags = drop 6 . skip . parseTags $ lbs
     dateTags = drop 29 matchIdTags
-    tt2date = parseTimeOrError True defaultTimeLocale "%-m/%-d/%Y %l:%M:%S %p" . tt2string
+    tt2date = fromJust . readHTime . tt2string
 
 fetchHistory :: Manager -> GlobalPlace -> IO L.ByteString
 fetchHistory manager gp = do

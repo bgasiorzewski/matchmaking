@@ -70,7 +70,10 @@ instance Enum Place where
 
 type Grandmasters = Map GlobalPlace HotslogsPlayer
 
-data Task = FetchGrandmasters !Region | FetchLastMatch !GlobalPlace
+data Task
+    = FetchGrandmasters !Region
+    | FetchLastMatch !GlobalPlace
+    | FetchMatch !Region !UTCTime !HotslogsMatch
     deriving Show
 
 gmSize :: Int
@@ -87,3 +90,6 @@ enumToPred :: (Eq a, Enum a, Bounded a) => a -> [a]
 enumToPred a
     | a == minBound = []
     | otherwise = [minBound .. pred a]
+
+readHTime :: String -> Maybe UTCTime
+readHTime = parseTimeM True defaultTimeLocale "%-m/%-d/%Y %l:%M:%S %p"
