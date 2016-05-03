@@ -3,6 +3,7 @@ module Matchmaking.Scraper (scraper) where
 import Control.Monad
 import Control.Concurrent
 import Control.Exception
+import Data.Char
 import Data.IORef
 import Data.List
 import Data.Map ((!))
@@ -140,7 +141,9 @@ extractMatch hMatch reg played lbs = Match hMatch played mh ml nh nl reg
     extractSingle rowTag = (tt2integral $ getHotdogs rowTag, tt2text $ getName rowTag)
     getName = head . dropWhile (not . isTagText) . drop 4
     getHotdogs = head . filter isInt . filter isTagText . drop 20
-    isInt = isJust . LC.readInteger . stripParen . fromTagText
+    isInt tt = case LC.readInteger . stripParen . fromTagText $ tt of
+        Nothing -> False
+        Just (_, rest) -> not . LC.any isAlpha $ rest
 
 fetchMatch :: Manager -> HotslogsMatch -> IO L.ByteString
 fetchMatch manager hMatch = responseBody <$> httpLbs request manager
