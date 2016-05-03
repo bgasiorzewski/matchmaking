@@ -12,7 +12,7 @@ import qualified Text.Blaze.Html5.Attributes as A
 import Matchmaking.Common
 
 threshold :: Double
-threshold = 0.1
+threshold = 0.3
 
 answer :: Int -> Int -> Html
 answer _ 0 = H.p "DUNNO... the website is broken" ! A.id "answer"
@@ -26,7 +26,7 @@ answer np na
     pr cl = H.span (fromString $ show percentage ++ "%") ! A.class_ cl
     detail cl = do
         H.p $ "In " >> pr cl >> " of high level matches the difference between best and worst player exceeds 1000 hotdogs."
-        H.p $ "Before the Tracer patch it was 123%."
+        H.p $ "Before the Tracer patch it was 22%."
     broken = do
         H.p (H.span "NO" ! A.class_ "no" >> ", matchmaking is still broken") ! A.id "answer"
         detail "number no"
