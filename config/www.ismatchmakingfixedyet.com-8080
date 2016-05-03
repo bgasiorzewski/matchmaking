@@ -1,0 +1,7 @@
+server {
+	listen 8080;
+	root /home/matchmaking/static;
+	server_name www.ismatchmakingfixedyet.com;
+	# 15 minutes
+	expires 900;
+}

@@ -1,0 +1,15 @@
+# cp matchmaking.service /etc/systemd/system/
+# systemctl enable matchmaking
+
+[Unit]
+Description=Matchmaking
+Requires=postgresql.service
+After=postgresql.service
+
+[Service]
+ExecStart=/home/matchmaking/.local/bin/matchmaking
+Restart=on-failure
+User=matchmaking
+
+[Install]
+WantedBy=default.target
