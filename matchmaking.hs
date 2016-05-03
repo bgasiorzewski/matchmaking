@@ -24,8 +24,8 @@ main :: IO ()
 main = do
     -- set up ekg
     store <- serverMetricStore <$> forkServer "0.0.0.0" 8000
-    registerGauge "potato matches" (toEnum . fst <$> readIORef mmStats) store
-    registerGauge "all matches" (toEnum . snd <$> readIORef mmStats) store
+    registerGauge "recent potato matches" (toEnum . fst <$> readIORef mmStats) store
+    registerGauge "recent matches" (toEnum . snd <$> readIORef mmStats) store
     -- set up scrapers
     args <- getArgs
     (entry, auxIdsRaw, auxDatesRaw) <- case args of

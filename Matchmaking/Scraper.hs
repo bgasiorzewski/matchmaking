@@ -51,7 +51,6 @@ scraper conn tasks = do
 handleTask :: Manager -> Connection -> Task -> IO ()
 handleTask manager _ (FetchGrandmasters reg) = do
     players <- extractPlayers <$> fetchLeaderboard manager reg
-    putStrLn $ show players
     updatePlayers reg players
 handleTask manager conn (FetchLastMatch gp) = do
     (lastMatchId, played) <- extractMatchId <$> fetchHistory manager gp
