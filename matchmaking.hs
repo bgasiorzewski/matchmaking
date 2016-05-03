@@ -6,6 +6,7 @@ import Data.Maybe
 import Database.PostgreSQL.Simple
 import Network.Wai.Handler.Warp
 import System.Environment
+import System.IO
 import System.Metrics
 import System.Remote.Monitoring
 import Text.Read (readMaybe)
@@ -43,6 +44,8 @@ main = do
     putStrLn $ "Aux scrape queue size (assuming EU region): " ++ show (length auxTasks)
     auxConn <- connectPostgreSQL "user=matchmaking dbname=matchmaking"
     _ <- forkIO $ scraper auxConn auxTasks
+    -- flush
+    hFlush stdout
     -- set up scotty
     scottyOpts scottySettings $ get "/" rootApp
     where

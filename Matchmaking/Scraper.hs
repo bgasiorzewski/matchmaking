@@ -13,6 +13,7 @@ import Data.Time
 import Database.PostgreSQL.Simple
 import Network.HTTP.Client
 import Network.HTTP.Types
+import System.IO
 import System.IO.Unsafe
 import Text.HTML.TagSoup
 import qualified Data.ByteString as S
@@ -29,6 +30,7 @@ scraper conn tasks = do
     manager <- newManager $ defaultManagerSettings { managerModifyRequest = addHeaders }
     forM_ tasks $ \task -> do
         putStrLn $ "scraping " ++ show task
+        hFlush stdout
         catches (handleTask manager conn task)
             [ Handler $ \e -> putException (e :: ErrorCall)
             , Handler $ \e -> putException (e :: HttpException)
@@ -44,7 +46,9 @@ scraper conn tasks = do
             : requestHeaders r
         , cookieJar = Nothing
         }
-    putException e = putStrLn $ "updateStats error'd: " ++ show e
+    putException e = do
+        putStrLn $ "updateStats error'd: " ++ show e
+        hFlush stdout
 
 handleTask :: Manager -> Connection -> Task -> IO ()
 handleTask manager _ (FetchGrandmasters reg) = do
