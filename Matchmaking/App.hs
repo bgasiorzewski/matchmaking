@@ -25,8 +25,8 @@ answer np na
     percentage = round $ 100 * ratio
     pr cl = H.span (fromString $ show percentage ++ "%") ! A.class_ cl
     detail cl = do
-        H.p $ "In " >> pr cl >> " of high level matches the difference between best and worst player exceeds 1000 hotdogs."
-        H.p $ "Before the Tracer patch it was 22%."
+        H.p $ "In " >> pr cl >> " of high level matches, the difference between the best and worst player exceeds 1000 hotdogs."
+        H.p $ "It was 22% before Tracer's release."
     broken = do
         H.p (H.span "NO" ! A.class_ "no" >> ", matchmaking is still broken") ! A.id "answer"
         detail "number no"
