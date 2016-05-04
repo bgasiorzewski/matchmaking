@@ -30,9 +30,17 @@ answer np na
     broken = do
         H.p (H.span "NO" ! A.class_ "no" >> ", matchmaking is still broken") ! A.id "answer"
         detail "number no"
+        footer "no"
     fixed = do
         H.p (H.span "YES" ! A.class_ "yes" >> ", matchmaking is working well") ! A.id "answer"
         detail "number yes"
+        footer "yes"
+    footer cl = H.footer $ do
+        _ <- "The \""
+        H.span (fromString $ show percentage ++ "%") ! A.class_ cl
+        _ <- "\" number is updated in real-time. "
+        H.a "Find out how."
+            ! A.href "https://github.com/HotChick91/matchmaking#how-does-it-work"
 
 rootApp :: ActionM ()
 rootApp = do
@@ -62,8 +70,6 @@ rootApp = do
         H.body $ do
             H.h1 "Is Hero League matchmaking for Heroes of the Storm fixed yet?"
             answer nPotato nAll
-            H.footer $ H.a "Created by Bartek Gąsiorzewski"
-                ! A.href "https://github.com/HotChick91/matchmaking"
             H.script $ mconcat
                 [ "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){"
                 , "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),"
