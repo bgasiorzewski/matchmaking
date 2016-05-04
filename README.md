@@ -10,6 +10,10 @@ There is a scraper running in the background that continuously checks Hotslogs f
 
 The ultimate answer is "YES" if that percentage is less than 30%. Otherwise the answer is "NO."
 
+I got the 22% number (for games before the Tracer patch) by checking matches from [zwHydra](http://www.hotslogs.com/Player/Profile?PlayerID=258913)'s history.
+He's a guy with high, stable MMR, who plays a lot of solo queue Hero League, so he's the perfect fit.
+For him, the numbers were: 22% pre-patch, 75% post-patch. "75%" seems to align with the general population, which gives me some confidence in the 22% number.
+
 ## What is the tech behind it?
 
 The website is written in [Haskell](https://www.haskell.org/).

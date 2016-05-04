@@ -47,6 +47,18 @@ rootApp = do
                 ! A.href "http://www.ismatchmakingfixedyet.com:8080/favicon.ico"
                 ! A.rel "shortcut icon"
                 ! A.type_ "image/x-icon"
+            H.meta
+                ! H.customAttribute "property" "og:title"
+                ! A.content "Is Matchmaking Fixed Yet?"
+            H.meta
+                ! H.customAttribute "property" "og:type"
+                ! A.content "website"
+            H.meta
+                ! H.customAttribute "property" "og:image"
+                ! A.content "http://www.ismatchmakingfixedyet.com:8080/potatoes.png"
+            H.meta
+                ! H.customAttribute "property" "og:url"
+                ! A.content "http://www.ismatchmakingfixedyet.com/"
         H.body $ do
             H.h1 "Is Hero League matchmaking for Heroes of the Storm fixed yet?"
             answer nPotato nAll
