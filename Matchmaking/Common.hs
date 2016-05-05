@@ -77,7 +77,7 @@ data Task
     deriving Show
 
 gmSize :: Int
-gmSize = 100
+gmSize = 500
 
 nRegions :: Int
 nRegions = 2

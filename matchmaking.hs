@@ -3,26 +3,37 @@ module Main where
 import Control.Concurrent
 import Control.Monad
 import Data.IORef
-import Data.Maybe
+import Data.List
 import Database.PostgreSQL.Simple
 import Network.Wai.Handler.Warp
 import System.Environment
+import System.Exit
 import System.IO
 import System.Metrics
 import System.Remote.Monitoring
-import Text.Read (readMaybe)
 import Web.Scotty
+import qualified Data.ByteString.Lazy as L
 
 import Matchmaking.App
 import Matchmaking.Common
 import Matchmaking.DB
 import Matchmaking.Scraper
 
-warmupTasks :: [Task]
-warmupTasks =
+fetchGrandmasters :: [Task]
+fetchGrandmasters =
     [ FetchGrandmasters NA
     , FetchGrandmasters EU
     ]
+
+parseHtml :: IO ()
+parseHtml = do
+    args <- getArgs
+    case args of
+        [s] | ".html" `isSuffixOf` s -> do
+            contents <- L.readFile s
+            mapM_ print $ extractPlayers contents
+            exitSuccess
+        _ -> return ()
 
 setUpEkg :: IO ()
 setUpEkg = do
@@ -32,32 +43,23 @@ setUpEkg = do
 
 setUpScrapers :: IO ()
 setUpScrapers = do
-    (mEntry, auxIdsRaw, auxDatesRaw) <- parseArgs =<< getArgs
+    warmupTasks <- parseArgs =<< getArgs
     conn <- connectPostgreSQL "user=matchmaking dbname=matchmaking"
-    entry <- maybe (loadPersist conn) (return . toEnum) mEntry
+    entry <- loadPersist conn
     putStrLn $ "Starting scraping from " ++ show entry
     let tasks = warmupTasks ++ map FetchLastMatch [entry ..] ++ allTasks
         allTasks = map FetchLastMatch (enumToPred entry) ++ tasks
-    _ <- forkIO $ scraper conn tasks
-    let auxRaw = zip (lines $! auxIdsRaw) (lines $! auxDatesRaw)
-    let auxTasks = mapMaybe mkAux auxRaw
-    putStrLn $ "Aux scrape queue size (assuming EU region): " ++ show (length auxTasks)
-    auxConn <- connectPostgreSQL "user=matchmaking dbname=matchmaking"
-    void $ forkIO $ scraper auxConn auxTasks
+    void $ forkIO $ scraper conn tasks
     where
-    parseArgs [s, fIds, fDates]
-        = (,,) (readMaybe s) <$> readFile fIds <*> readFile fDates
-    parseArgs [s]
-        = return (readMaybe s, "", "")
-    parseArgs _
-        = return (Nothing, "", "")
-    mkAux (idRaw, dateRaw) = do
-        hMatch <- readMaybe idRaw
-        played <- readHTime dateRaw
-        return $ FetchMatch EU played hMatch
+    parseArgs [na, eu] = do
+        playersFromFile NA na
+        playersFromFile EU eu
+        return []
+    parseArgs _ = return fetchGrandmasters
 
 main :: IO ()
 main = do
+    parseHtml
     setUpEkg
     setUpScrapers
     hFlush stdout

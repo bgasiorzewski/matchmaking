@@ -1,4 +1,8 @@
-module Matchmaking.Scraper (scraper) where
+module Matchmaking.Scraper (
+    scraper,
+    playersFromFile,
+    extractPlayers,
+) where
 
 import Control.Monad
 import Control.Concurrent
@@ -17,7 +21,6 @@ import Network.HTTP.Types
 import System.IO
 import System.IO.Unsafe
 import Text.HTML.TagSoup
-import qualified Data.ByteString as S
 import qualified Data.ByteString.Char8 as SC
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
@@ -52,9 +55,7 @@ scraper conn tasks = do
         hFlush stdout
 
 handleTask :: Manager -> Connection -> Task -> IO ()
-handleTask manager _ (FetchGrandmasters reg) = do
-    players <- extractPlayers <$> fetchLeaderboard manager reg
-    updatePlayers reg players
+handleTask _ _ (FetchGrandmasters _) = error "FetchGrandmasters unsupported"
 handleTask manager conn (FetchMatch reg played hMatch) = do
     matchHtml <- fetchMatch manager hMatch
     let lastMatch = extractMatch hMatch reg played matchHtml
@@ -69,6 +70,11 @@ handleTask manager conn (FetchLastMatch gp) = do
         present <- matchPresent conn hMatch
         unless present $ handleTask manager conn (FetchMatch (gpRegion gp) played hMatch)
 
+playersFromFile :: Region -> String -> IO ()
+playersFromFile reg fn = do
+    players <- map read . lines <$> readFile fn
+    updatePlayers reg players
+
 -- all the extract* functions are very susceptible to changes in Hotslogs HTML
 -- an API would be a godsend
 extractPlayers :: L.ByteString -> [HotslogsPlayer]
@@ -78,10 +84,6 @@ extractPlayers = map shapeshift . sections rowPred . parseTags
         tag ~== ("<tr class='rgRow'>" :: String) ||
         tag ~== ("<tr class='rgAltRow'>" :: String)
     shapeshift = tt2integral . (!! 3)
-
-reg2hreg :: Region -> S.ByteString
-reg2hreg NA = "1"
-reg2hreg EU = "2"
 
 stripParen :: L.ByteString -> L.ByteString
 stripParen lbs
@@ -96,15 +98,6 @@ tt2string = LC.unpack . fromTagText
 
 tt2text :: Tag L.ByteString -> Text
 tt2text = decodeUtf8 . L.toStrict . fromTagText
-
-fetchLeaderboard :: Manager -> Region -> IO L.ByteString
-fetchLeaderboard manager reg = responseBody <$> httpLbs request manager
-    where
-    request = setQueryString
-        [ ("Region", Just $ reg2hreg reg)
-        , ("GameMode", Just "4")
-        , ("League", Just "Master")
-        ] "http://www.hotslogs.com/Rankings"
 
 gms :: IORef Grandmasters
 gms = unsafePerformIO $ newIORef mempty
