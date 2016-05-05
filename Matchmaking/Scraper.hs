@@ -41,7 +41,7 @@ scraper conn tasks = do
             , Handler $ \e -> putException (e :: SqlError)
             ]
         catch (updateStats conn) $ \e -> putException (e :: SqlError)
-        threadDelay $ 60 * 1000 * 1000
+        threadDelay $ 20 * 1000 * 1000
     where
     addHeaders r = return $ r
         { requestHeaders

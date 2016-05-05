@@ -11,7 +11,8 @@ CREATE TABLE matches (
     mmr_low INTEGER NOT NULL,
     name_high VARCHAR(12) NOT NULL,
     name_low VARCHAR(12) NOT NULL,
-    hotslogs_region INTEGER NOT NULL
+    hotslogs_region INTEGER NOT NULL,
+    time_added TIMESTAMP DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') NOT NULL
 );
 
 CREATE INDEX matches_spread ON matches (time_played, (mmr_high - mmr_low));
