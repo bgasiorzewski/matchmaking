@@ -8,11 +8,7 @@ Shoutout to Blizzard for creating [Heroes of the Storm](http://www.heroesofthest
 
 There is a scraper running in the background that continuously checks Hotslogs for new matches played by the top 100 players from NA and EU. Each new match is added to the database. Then, the background service calculates the percentage of matches played within the last 24 hours, in which the difference between the highest and lowest-ranked player is over 1000 Hotslogs MMR.
 
-The ultimate answer is "YES" if that percentage is less than 30%. Otherwise the answer is "NO."
-
-I got the 22% number (for games before the Tracer patch) by checking matches from [zwHydra](http://www.hotslogs.com/Player/Profile?PlayerID=258913)'s history.
-He's a guy with high, stable MMR, who plays a lot of solo queue Hero League, so he's the perfect fit.
-For him, the numbers were: 22% pre-patch, 75% post-patch. "75%" seems to align with the general population, which gives me some confidence in the 22% number.
+The ultimate answer is "YES" if that percentage is less than 50%. Otherwise the answer is "NO."
 
 ## What is the tech behind it?
 
