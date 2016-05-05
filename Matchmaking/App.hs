@@ -24,8 +24,9 @@ answer np na
     percentage :: Int
     percentage = round $ 100 * ratio
     pr cl = H.span (fromString $ show percentage ++ "%") ! A.class_ cl
-    detail cl =
-        H.p $ "In " >> pr cl >> " of high level matches, the difference between the best and worst player exceeds 1000 hotdogs."
+    detail cl = do
+        H.p $ "In " >> pr cl >> " of high level matches*, the difference between the best and worst player exceeds 1000 hotdogs."
+        H.p $ "* Matches that feature at least one player from the top 500 NA or EU."
     broken = do
         H.p (H.span "NO" ! A.class_ "no" >> ", matchmaking is still broken") ! A.id "answer"
         detail "number no"
