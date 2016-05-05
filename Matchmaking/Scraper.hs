@@ -55,15 +55,19 @@ handleTask :: Manager -> Connection -> Task -> IO ()
 handleTask manager _ (FetchGrandmasters reg) = do
     players <- extractPlayers <$> fetchLeaderboard manager reg
     updatePlayers reg players
-handleTask manager conn (FetchLastMatch gp) = do
-    (lastMatchId, played) <- extractMatchId <$> fetchHistory manager gp
-    present <- matchPresent conn lastMatchId
-    unless present $ handleTask manager conn (FetchMatch (gpRegion gp) played lastMatchId)
-    savePersist conn $ cyclSucc gp
 handleTask manager conn (FetchMatch reg played hMatch) = do
     matchHtml <- fetchMatch manager hMatch
     let lastMatch = extractMatch hMatch reg played matchHtml
     insertMatch conn lastMatch
+handleTask manager conn (FetchLastMatch gp) = do
+    history <- fetchHistory manager gp
+    handleMatch $ extractMatchId history 0
+    handleMatch $ extractMatchId history 99
+    savePersist conn $ cyclSucc gp
+    where
+    handleMatch (hMatch, played) = do
+        present <- matchPresent conn hMatch
+        unless present $ handleTask manager conn (FetchMatch (gpRegion gp) played hMatch)
 
 -- all the extract* functions are very susceptible to changes in Hotslogs HTML
 -- an API would be a godsend
@@ -113,10 +117,10 @@ updatePlayers reg players = modifyIORef' gms $ insertMany $ zip regGPs players
     insertMany [] tree = tree
     insertMany ((k, v) : kvs) tree = insertMany kvs $! M.insert k v tree
 
-extractMatchId :: L.ByteString -> (HotslogsMatch, UTCTime)
-extractMatchId lbs = (tt2integral $ head matchIdTags, tt2date $ head dateTags)
+extractMatchId :: L.ByteString -> Int -> (HotslogsMatch, UTCTime)
+extractMatchId lbs n = (tt2integral $ head matchIdTags, tt2date $ head dateTags)
     where
-    skip = dropWhile (~/= ("<tr id='__0'>" :: String))
+    skip = dropWhile (~/= ("<tr id='__" ++ show n ++ "'>"))
     matchIdTags = drop 6 . skip . parseTags $ lbs
     dateTags = drop 29 matchIdTags
     tt2date = fromJust . readHTime . tt2string
