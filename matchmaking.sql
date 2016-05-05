@@ -17,3 +17,11 @@ CREATE TABLE matches (
 CREATE INDEX matches_spread ON matches (time_played, (mmr_high - mmr_low));
 
 GRANT SELECT, INSERT ON matches TO matchmaking;
+
+CREATE TABLE persist (
+    next_gp INTEGER
+);
+
+INSERT INTO persist VALUES (0);
+
+GRANT SELECT, UPDATE ON persist TO matchmaking;

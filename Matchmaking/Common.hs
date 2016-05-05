@@ -91,5 +91,10 @@ enumToPred a
     | a == minBound = []
     | otherwise = [minBound .. pred a]
 
+cyclSucc :: (Eq a, Enum a, Bounded a) => a -> a
+cyclSucc a
+    | a == maxBound = minBound
+    | otherwise = succ a
+
 readHTime :: String -> Maybe UTCTime
 readHTime = parseTimeM True defaultTimeLocale "%-m/%-d/%Y %l:%M:%S %p"

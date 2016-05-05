@@ -59,6 +59,7 @@ handleTask manager conn (FetchLastMatch gp) = do
     (lastMatchId, played) <- extractMatchId <$> fetchHistory manager gp
     present <- matchPresent conn lastMatchId
     unless present $ handleTask manager conn (FetchMatch (gpRegion gp) played lastMatchId)
+    savePersist conn $ cyclSucc gp
 handleTask manager conn (FetchMatch reg played hMatch) = do
     matchHtml <- fetchMatch manager hMatch
     let lastMatch = extractMatch hMatch reg played matchHtml

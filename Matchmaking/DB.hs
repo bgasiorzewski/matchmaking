@@ -2,6 +2,8 @@ module Matchmaking.DB (
     updateStats,
     matchPresent,
     insertMatch,
+    loadPersist,
+    savePersist,
 ) where
 
 import Database.PostgreSQL.Simple
@@ -49,3 +51,17 @@ imQ = mconcat
 
 insertMatch :: Connection -> Match -> IO ()
 insertMatch conn match = void $ execute conn imQ match
+
+lpQ :: Query
+lpQ = "SELECT next_gp FROM persist"
+
+loadPersist :: Connection -> IO GlobalPlace
+loadPersist conn = do
+    [Only next_gp] <- query_ conn lpQ
+    return $ toEnum next_gp
+
+spQ :: Query
+spQ = "UPDATE persist SET next_gp = ?"
+
+savePersist :: Connection -> GlobalPlace -> IO ()
+savePersist conn gp = void $ execute conn spQ $ Only $ fromEnum gp
