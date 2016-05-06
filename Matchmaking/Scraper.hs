@@ -29,6 +29,12 @@ import qualified Data.Map.Strict as M
 import Matchmaking.Common
 import Matchmaking.DB
 
+usScrapeSleep :: Int
+usScrapeSleep = 20 * 1000 * 1000
+
+usErrorSleep :: Int
+usErrorSleep = 100 * 1000 * 1000
+
 scraper :: Connection -> [Task] -> IO ()
 scraper conn tasks = do
     manager <- newManager $ defaultManagerSettings { managerModifyRequest = addHeaders }
@@ -41,7 +47,7 @@ scraper conn tasks = do
             , Handler $ \e -> putException (e :: SqlError)
             ]
         catch (updateStats conn) $ \e -> putException (e :: SqlError)
-        threadDelay $ 20 * 1000 * 1000
+        threadDelay usScrapeSleep
     where
     addHeaders r = return $ r
         { requestHeaders
@@ -51,8 +57,9 @@ scraper conn tasks = do
         , cookieJar = Nothing
         }
     putException e = do
-        putStrLn $ "updateStats error'd: " ++ show e
+        putStrLn $ "scraper error'd: " ++ show e
         hFlush stdout
+        threadDelay usErrorSleep
 
 handleTask :: Manager -> Connection -> Task -> IO ()
 handleTask _ _ (FetchGrandmasters _) = error "FetchGrandmasters unsupported"
