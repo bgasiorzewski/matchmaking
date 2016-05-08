@@ -6,7 +6,7 @@ Shoutout to Blizzard for creating [Heroes of the Storm](http://www.heroesofthest
 
 ## How does it work?
 
-There is a scraper running in the background that continuously checks Hotslogs for new matches played by the top ~~100~~ 500 players from NA and EU (this is a recent change, please give the service some time to update). Each new match is added to the database. Then, the background service calculates the percentage of matches played within the last 24 hours, in which the difference between the highest and lowest-ranked player is over 1000 Hotslogs MMR.
+There is a scraper running in the background that continuously checks Hotslogs for new matches played by the top 500 players from NA and EU. Each new match is added to the database. Then, the background service calculates the percentage of matches played within the last 24 hours, in which the difference between the highest and lowest-ranked player is over 1000 Hotslogs MMR.
 
 The ultimate answer is "YES" if that percentage is less than 30%. Otherwise the answer is "NO."
 
