@@ -9,6 +9,7 @@ import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.ToField
 import Database.PostgreSQL.Simple.ToRow
 import System.IO.Unsafe
+import qualified Data.ByteString.Lazy as L
 
 data Region = NA | EU
     deriving (Show, Eq, Ord, Bounded, Enum)
@@ -85,6 +86,10 @@ nRegions = 2
 mmStats :: IORef (Int, Int)
 mmStats = unsafePerformIO $ newIORef (0, 0)
 {-# NOINLINE mmStats #-}
+
+chartCsv :: IORef L.ByteString
+chartCsv = unsafePerformIO $ newIORef ""
+{-# NOINLINE chartCsv #-}
 
 enumToPred :: (Eq a, Enum a, Bounded a) => a -> [a]
 enumToPred a

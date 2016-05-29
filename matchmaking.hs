@@ -63,7 +63,9 @@ main = do
     setUpEkg
     setUpScrapers
     hFlush stdout
-    scottyOpts scottySettings $ get "/" rootApp
+    scottyOpts scottySettings $ do
+        get "/" rootApp
+        get "/csv" csvApp
     where
     scottySettings = Options 0 warpSettings
     warpSettings = setHost "127.0.0.1" $ setPort 3000 defaultSettings

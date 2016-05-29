@@ -11,6 +11,7 @@ executable matchmaking
   main-is: matchmaking.hs
   other-modules:
     Matchmaking.App,
+    Matchmaking.Chart,
     Matchmaking.Common,
     Matchmaking.DB,
     Matchmaking.Scraper
@@ -20,6 +21,7 @@ executable matchmaking
     base,
     blaze-html,
     bytestring,
+    cassava,
     containers,
     ekg,
     ekg-core,

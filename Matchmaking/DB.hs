@@ -7,12 +7,13 @@ module Matchmaking.DB (
 ) where
 
 import Database.PostgreSQL.Simple
+import Data.Csv hiding (Only)
 import Data.IORef
 import Control.Monad
 
+import Matchmaking.Chart
 import Matchmaking.Common
 
--- consider checking for prime time
 usQ :: Query
 usQ = mconcat
     [ "SELECT "
@@ -23,10 +24,23 @@ usQ = mconcat
     , " WHERE time_played > CURRENT_TIMESTAMP AT TIME ZONE 'UTC' - INTERVAL '1 day')"
     ]
 
+cdQ :: Query
+cdQ = mconcat
+    [ "SELECT "
+    , "CAST(time_played AS DATE) AS date_played,"
+    , "COUNT(CASE WHEN mmr_high - mmr_low > 1000 THEN 1 END) AS n_potato,"
+    , "COUNT(*) AS n_all "
+    , "FROM matches "
+    , "WHERE time_added >= '2016-05-06' "
+    , "GROUP BY date_played "
+    ]
+
 updateStats :: Connection -> IO ()
 updateStats conn = do
     [matchCounts] <- query_ conn usQ
     writeIORef mmStats matchCounts
+    cd <- query_ conn cdQ
+    writeIORef chartCsv $ encodeDefaultOrderedByName (cd :: [ChartRow])
 
 mpQ :: Query
 mpQ = "SELECT EXISTS (SELECT 1 FROM matches WHERE hotslogs_match = ?)"

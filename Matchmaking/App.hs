@@ -1,4 +1,4 @@
-module Matchmaking.App (rootApp) where
+module Matchmaking.App (rootApp, csvApp) where
 
 import Control.Monad.IO.Class
 import Data.IORef
@@ -79,3 +79,9 @@ rootApp = do
                 , "ga('create', 'UA-77246746-1', 'auto');"
                 , "ga('send', 'pageview');"
                 ]
+
+csvApp :: ActionM ()
+csvApp = do
+    setHeader "Content-Type" "text/csv"
+    csv <- liftIO $ readIORef chartCsv
+    raw csv

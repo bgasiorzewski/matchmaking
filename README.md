@@ -20,6 +20,7 @@ It uses:
 - [scotty](https://hackage.haskell.org/package/scotty) and [blaze](https://hackage.haskell.org/package/blaze-html) to display the beautiful web page
 - [ekg](https://hackage.haskell.org/package/ekg) for "monitoring" (visit the website on port 8000 to see it in action)
 - [postgresql-simple](https://hackage.haskell.org/package/postgresql-simple) (and [PostgreSQL](http://www.postgresql.org/)) for data storage
+- [cassava](https://hackage.haskell.org/package/cassava) for CSV generation
 - [nginx](http://nginx.org/) as a reverse proxy and for static files
 - [stack](http://www.haskellstack.org/) for building
 
