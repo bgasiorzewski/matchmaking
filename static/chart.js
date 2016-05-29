@@ -30,4 +30,3 @@ g.ready(function() {
         }
     ]);
 });
-
