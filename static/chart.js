@@ -1,8 +1,18 @@
 "use strict";
+var formatter = function (number) {
+    return number + "%";
+}
 var g = new Dygraph(
     "chart",
     "http://www.ismatchmakingfixedyet.com/csv",
-    { fillGraph: true, fractions: true, valueRange: [0, 100] }
+    {
+        fillGraph: true,
+        fractions: true,
+        valueRange: [0, 100],
+        axes: {
+            y: { axisLabelFormatter: formatter }
+        }
+    }
 );
 g.ready(function() {
     g.setAnnotations([
@@ -20,3 +30,4 @@ g.ready(function() {
         }
     ]);
 });
+
