@@ -32,6 +32,7 @@ cdQ = mconcat
     , "COUNT(*) AS n_all "
     , "FROM matches "
     , "WHERE time_added >= '2016-05-06' "
+    , "AND time_played >= '2016-05-06' "
     , "GROUP BY date_played "
     ]
 
