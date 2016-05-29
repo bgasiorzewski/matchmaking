@@ -1,8 +1,9 @@
-body { text-align: center; margin: 10% 5% 0% 5%; font-family: serif; }
+body { text-align: center; margin: 5% 5% 0% 5%; font-family: serif; }
 h1 { font-size: 1em; font-weight: normal; }
 .yes { color: green; }
 .no { color: red; }
 .number { font-size: 1.33em; }
 #answer { font-size: 2em; }
 #detail { font-size: 1em; }
-footer { font-size: 1em; margin-top: 10%; }
+footer { font-size: 1em; }
+#chart { margin: 50px auto 50px auto; }

@@ -33,6 +33,7 @@ cdQ = mconcat
     , "FROM matches "
     , "WHERE time_played >= '2016-05-06' "
     , "GROUP BY date_played "
+    , "ORDER BY date_played ASC"
     ]
 
 updateStats :: Connection -> IO ()
@@ -40,7 +41,10 @@ updateStats conn = do
     [matchCounts] <- query_ conn usQ
     writeIORef mmStats matchCounts
     cd <- query_ conn cdQ
-    writeIORef chartCsv $ encodeDefaultOrderedByName (cd :: [ChartRow])
+    writeIORef chartCsv $ enc (cd :: [ChartRow])
+    where
+    -- dygraphs treats quotes as part of data
+    enc = encodeDefaultOrderedByNameWith $ defaultEncodeOptions { encQuoting = QuoteNone }
 
 mpQ :: Query
 mpQ = "SELECT EXISTS (SELECT 1 FROM matches WHERE hotslogs_match = ?)"
