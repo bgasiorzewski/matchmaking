@@ -41,10 +41,13 @@ updateStats conn = do
     [matchCounts] <- query_ conn usQ
     writeIORef mmStats matchCounts
     cd <- query_ conn cdQ
-    writeIORef chartCsv $ enc (cd :: [ChartRow])
+    writeIORef chartCsv $ enc $ safeInit (cd :: [ChartRow])
     where
     -- dygraphs treats quotes as part of data
     enc = encodeDefaultOrderedByNameWith $ defaultEncodeOptions { encQuoting = QuoteNone }
+    -- current day is highly volatile, hide it
+    safeInit [] = []
+    safeInit xs = init xs
 
 mpQ :: Query
 mpQ = "SELECT EXISTS (SELECT 1 FROM matches WHERE hotslogs_match = ?)"

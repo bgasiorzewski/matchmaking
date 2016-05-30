@@ -1,6 +1,8 @@
 "use strict";
-var formatter = function (number) {
-    return number + "%";
+var formatter = function (precision) {
+    return function (number) {
+        return number.toFixed(precision) + "%";
+    }
 }
 var g = new Dygraph(
     "chart",
@@ -8,9 +10,11 @@ var g = new Dygraph(
     {
         fillGraph: true,
         fractions: true,
-        valueRange: [0, 100],
         axes: {
-            y: { axisLabelFormatter: formatter }
+            y: {
+                axisLabelFormatter: formatter(0),
+                valueFormatter: formatter(1)
+            }
         }
     }
 );
