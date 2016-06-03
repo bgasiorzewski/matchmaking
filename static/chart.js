@@ -22,6 +22,12 @@ g.ready(function() {
     g.setAnnotations([
         {
             series: "mismatched games",
+            x: "2016-05-13",
+            shortText: "T",
+            text: "DreamHack Tours"
+        },
+        {
+            series: "mismatched games",
             x: "2016-05-17",
             shortText: "C",
             text: "Chromie patch"
@@ -31,6 +37,12 @@ g.ready(function() {
             x: "2016-05-24",
             shortText: "O",
             text: "Overwatch release"
+        },
+        {
+            series: "mismatched games",
+            x: "2016-06-03",
+            shortText: "B",
+            text: "ESL Burbank"
         }
     ]);
 });
