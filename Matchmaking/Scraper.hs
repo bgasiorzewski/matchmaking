@@ -70,6 +70,7 @@ handleTask manager conn (FetchMatch reg played hMatch) = do
 handleTask manager conn (FetchLastMatch gp) = do
     history <- fetchHistory manager gp
     handleMatch $ extractMatchId history 0
+    handleMatch $ extractMatchId history 5
     savePersist conn $ cyclSucc gp
     where
     handleMatch (hMatch, played) = do
