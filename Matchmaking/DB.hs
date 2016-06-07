@@ -33,9 +33,11 @@ usQ = mconcat
     [ "SELECT "
     , "(SELECT COUNT(*) FROM matches"
     , " WHERE time_played > CURRENT_TIMESTAMP AT TIME ZONE 'UTC' - INTERVAL '1 day'"
-    , " AND mmr_high - mmr_low > 1000), "
+    , " AND mmr_high - mmr_low > 1000 "
+    , " AND time_added - time_played < '3 days'), "
     , "(SELECT COUNT(*) FROM matches"
-    , " WHERE time_played > CURRENT_TIMESTAMP AT TIME ZONE 'UTC' - INTERVAL '1 day')"
+    , " WHERE time_played > CURRENT_TIMESTAMP AT TIME ZONE 'UTC' - INTERVAL '1 day' "
+    , " AND time_added - time_played < '3 days')"
     ]
 
 cdQ :: Query
@@ -46,6 +48,7 @@ cdQ = mconcat
     , "COUNT(*) AS n_all "
     , "FROM matches "
     , "WHERE time_played >= '2016-05-06' "
+    , "AND time_added - time_played < '3 days' "
     , "GROUP BY date_played "
     , "ORDER BY date_played ASC"
     ]
