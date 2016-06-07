@@ -1,4 +1,5 @@
 module Matchmaking.DB (
+    connectPG,
     updateStats,
     matchPresent,
     insertMatch,
@@ -10,9 +11,22 @@ import Database.PostgreSQL.Simple
 import Data.Csv hiding (Only)
 import Data.IORef
 import Control.Monad
+import System.IO.Unsafe
 
 import Matchmaking.Chart
 import Matchmaking.Common
+
+connector :: IO Connection
+connector = connectPostgreSQL "user=matchmaking dbname=matchmaking"
+
+connRef :: IORef Connection
+connRef = unsafePerformIO $ newIORef =<< connector
+{-# NOINLINE connRef #-}
+
+connectPG :: IO ()
+connectPG = do
+    close =<< readIORef connRef
+    writeIORef connRef =<< connector
 
 usQ :: Query
 usQ = mconcat
@@ -36,8 +50,9 @@ cdQ = mconcat
     , "ORDER BY date_played ASC"
     ]
 
-updateStats :: Connection -> IO ()
-updateStats conn = do
+updateStats :: IO ()
+updateStats = do
+    conn <- readIORef connRef
     [matchCounts] <- query_ conn usQ
     writeIORef mmStats matchCounts
     cd <- query_ conn cdQ
@@ -52,8 +67,9 @@ updateStats conn = do
 mpQ :: Query
 mpQ = "SELECT EXISTS (SELECT 1 FROM matches WHERE hotslogs_match = ?)"
 
-matchPresent :: Connection -> HotslogsMatch -> IO Bool
-matchPresent conn hMatch = do
+matchPresent :: HotslogsMatch -> IO Bool
+matchPresent hMatch = do
+    conn <- readIORef connRef
     [Only present] <- query conn mpQ $ Only hMatch
     return present
 
@@ -70,19 +86,24 @@ imQ = mconcat
     , ") VALUES (?,?,?,?,?,?,?)"
     ]
 
-insertMatch :: Connection -> Match -> IO ()
-insertMatch conn match = void $ execute conn imQ match
+insertMatch :: Match -> IO ()
+insertMatch match = do
+    conn <- readIORef connRef
+    void $ execute conn imQ match
 
 lpQ :: Query
 lpQ = "SELECT next_gp FROM persist"
 
-loadPersist :: Connection -> IO GlobalPlace
-loadPersist conn = do
+loadPersist :: IO GlobalPlace
+loadPersist = do
+    conn <- readIORef connRef
     [Only next_gp] <- query_ conn lpQ
     return $ toEnum next_gp
 
 spQ :: Query
 spQ = "UPDATE persist SET next_gp = ?"
 
-savePersist :: Connection -> GlobalPlace -> IO ()
-savePersist conn gp = void $ execute conn spQ $ Only $ fromEnum gp
+savePersist :: GlobalPlace -> IO ()
+savePersist gp = do
+    conn <- readIORef connRef
+    void $ execute conn spQ $ Only $ fromEnum gp

@@ -35,18 +35,22 @@ usScrapeSleep = 20 * 1000 * 1000
 usErrorSleep :: Int
 usErrorSleep = 100 * 1000 * 1000
 
-scraper :: Connection -> [Task] -> IO ()
-scraper conn tasks = do
+scraper :: [Task] -> IO ()
+scraper tasks = do
     manager <- newManager $ defaultManagerSettings { managerModifyRequest = addHeaders }
     forM_ tasks $ \task -> do
         putStrLn $ "scraping " ++ show task
         hFlush stdout
-        catches (handleTask manager conn task)
+        catches (handleTask manager task)
             [ Handler $ \e -> putException (e :: ErrorCall)
             , Handler $ \e -> putException (e :: HttpException)
-            , Handler $ \e -> putException (e :: SqlError)
+            , Handler $ \e -> pgException (e :: SqlError)
+            , Handler $ \e -> pgException (e :: IOError)
             ]
-        catch (updateStats conn) $ \e -> putException (e :: SqlError)
+        catches updateStats
+            [ Handler $ \e -> pgException (e :: SqlError)
+            , Handler $ \e -> pgException (e :: IOError)
+            ]
         threadDelay usScrapeSleep
     where
     addHeaders r = return $ r
@@ -60,22 +64,34 @@ scraper conn tasks = do
         putStrLn $ "scraper error'd: " ++ show e
         hFlush stdout
         threadDelay usErrorSleep
+    pgException e = do
+        putStrLn $ "pg error'd: " ++ show e
+        hFlush stdout
+        reconnect
+    reconnect = do
+        threadDelay usErrorSleep
+        putStrLn "reconnecting to pg"
+        hFlush stdout
+        -- keep reconnecting until success
+        handle (\e -> const reconnect (e :: IOError)) $ do
+            connectPG
+            putStrLn "pg reconnect successful"
 
-handleTask :: Manager -> Connection -> Task -> IO ()
-handleTask _ _ (FetchGrandmasters _) = error "FetchGrandmasters unsupported"
-handleTask manager conn (FetchMatch reg played hMatch) = do
+handleTask :: Manager -> Task -> IO ()
+handleTask _ (FetchGrandmasters _) = error "FetchGrandmasters unsupported"
+handleTask manager (FetchMatch reg played hMatch) = do
     matchHtml <- fetchMatch manager hMatch
     let lastMatch = extractMatch hMatch reg played matchHtml
-    insertMatch conn lastMatch
-handleTask manager conn (FetchLastMatch gp) = do
+    insertMatch lastMatch
+handleTask manager (FetchLastMatch gp) = do
     history <- fetchHistory manager gp
     handleMatch $ extractMatchId history 0
     handleMatch $ extractMatchId history 5
-    savePersist conn $ cyclSucc gp
+    savePersist $ cyclSucc gp
     where
     handleMatch (hMatch, played) = do
-        present <- matchPresent conn hMatch
-        unless present $ handleTask manager conn (FetchMatch (gpRegion gp) played hMatch)
+        present <- matchPresent hMatch
+        unless present $ handleTask manager (FetchMatch (gpRegion gp) played hMatch)
 
 playersFromFile :: Region -> String -> IO ()
 playersFromFile reg fn = do

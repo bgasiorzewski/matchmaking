@@ -4,7 +4,6 @@ import Control.Concurrent
 import Control.Monad
 import Data.IORef
 import Data.List
-import Database.PostgreSQL.Simple
 import Network.Wai.Handler.Warp
 import System.Environment
 import System.Exit
@@ -44,12 +43,11 @@ setUpEkg = do
 setUpScrapers :: IO ()
 setUpScrapers = do
     warmupTasks <- parseArgs =<< getArgs
-    conn <- connectPostgreSQL "user=matchmaking dbname=matchmaking"
-    entry <- loadPersist conn
+    entry <- loadPersist
     putStrLn $ "Starting scraping from " ++ show entry
     let tasks = warmupTasks ++ map FetchLastMatch [entry ..] ++ allTasks
         allTasks = map FetchLastMatch (enumToPred entry) ++ tasks
-    void $ forkIO $ scraper conn tasks
+    void $ forkIO $ scraper tasks
     where
     parseArgs [na, eu] = do
         playersFromFile NA na
