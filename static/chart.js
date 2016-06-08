@@ -22,6 +22,12 @@ g.ready(function() {
     g.setAnnotations([
         {
             series: "mismatched games",
+            x: "2016-05-09",
+            shortText: "c",
+            text: "Chromie PTR"
+        },
+        {
+            series: "mismatched games",
             x: "2016-05-13",
             shortText: "T",
             text: "DreamHack Tours"
@@ -43,6 +49,12 @@ g.ready(function() {
             x: "2016-06-03",
             shortText: "B",
             text: "ESL Burbank"
+        },
+        {
+            series: "mismatched games",
+            x: "2016-06-07",
+            shortText: "m",
+            text: "Medivh PTR"
         }
     ]);
 });
