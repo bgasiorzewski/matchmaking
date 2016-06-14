@@ -159,11 +159,15 @@ extractMatch hMatch reg played lbs = Match hMatch played mh ml nh nl reg
     allTags = sections (~== ("<td class='rgGroupCol'>" :: String)) entryPoint
     rowTags = take 5 allTags ++ take 5 (drop 6 allTags)
     extractSingle rowTag = (tt2integral $ getHotdogs rowTag, tt2text $ getName rowTag)
-    getName = head . dropWhile (not . isTagText) . drop 4
-    getHotdogs = head . filter isInt . filter isTagText . drop 20
+    getName = head . dropWhile (not . isTagText) . getCell 1
+    getHotdogs = head . filter isInt . filter isTagText . getCell 20
     isInt tt = case LC.readInteger . stripParen . fromTagText $ tt of
         Nothing -> False
         Just (_, rest) -> not . LC.any isAlpha $ rest
+
+getCell :: Int -> [Tag L.ByteString] -> [Tag L.ByteString]
+getCell 0 = dropWhile (~/= ("<td>" :: String))
+getCell n = getCell (n - 1) . tail . getCell 0
 
 fetchMatch :: Manager -> HotslogsMatch -> IO L.ByteString
 fetchMatch manager hMatch = responseBody <$> httpLbs request manager
