@@ -117,11 +117,25 @@ stripParen lbs
 tt2integral :: Integral a => Tag L.ByteString -> a
 tt2integral = fromInteger . fst . fromJust . LC.readInteger . stripParen . fromTagText
 
+tts2integral :: Integral a => [Tag L.ByteString] -> a
+tts2integral = tt2integral . head . filter isInt . filter isTagText
+
+isInt :: Tag L.ByteString -> Bool
+isInt tt = case LC.readInteger . stripParen . fromTagText $ tt of
+    Nothing -> False
+    Just (_, rest) -> not . LC.any isAlpha $ rest
+
 tt2string :: Tag L.ByteString -> String
 tt2string = LC.unpack . fromTagText
 
+tts2string :: [Tag L.ByteString] -> String
+tts2string = tt2string . head . dropWhile (not . isTagText)
+
 tt2text :: Tag L.ByteString -> Text
 tt2text = decodeUtf8 . L.toStrict . fromTagText
+
+tts2text :: [Tag L.ByteString] -> Text
+tts2text = tt2text . head . dropWhile (not . isTagText)
 
 gms :: IORef Grandmasters
 gms = unsafePerformIO $ newIORef mempty
@@ -135,12 +149,12 @@ updatePlayers reg players = modifyIORef' gms $ insertMany $ zip regGPs players
     insertMany ((k, v) : kvs) tree = insertMany kvs $! M.insert k v tree
 
 extractMatchId :: L.ByteString -> Int -> (HotslogsMatch, UTCTime)
-extractMatchId lbs n = (tt2integral $ head matchIdTags, tt2date $ head dateTags)
+extractMatchId lbs n = (tts2integral matchIdTags, tts2date dateTags)
     where
     skip = dropWhile (~/= ("<tr id='__" ++ show n ++ "'>"))
-    matchIdTags = drop 6 . skip . parseTags $ lbs
-    dateTags = drop 29 matchIdTags
-    tt2date = fromJust . readHTime . tt2string
+    matchIdTags = getCell 1 . skip . parseTags $ lbs
+    dateTags = getCell 9 matchIdTags
+    tts2date = fromJust . readHTime . tts2string
 
 fetchHistory :: Manager -> GlobalPlace -> IO L.ByteString
 fetchHistory manager gp = do
@@ -160,12 +174,9 @@ extractMatch hMatch reg played lbs = Match hMatch played mh ml nh nl reg
     entryPoint = dropWhile (~/= ("<td colspan='13'>" :: String)) . parseTags $ lbs
     allTags = sections (~== ("<td class='rgGroupCol'>" :: String)) entryPoint
     rowTags = take 5 allTags ++ take 5 (drop 6 allTags)
-    extractSingle rowTag = (tt2integral $ getHotdogs rowTag, tt2text $ getName rowTag)
-    getName = head . dropWhile (not . isTagText) . getCell 1
-    getHotdogs = head . filter isInt . filter isTagText . getCell 20
-    isInt tt = case LC.readInteger . stripParen . fromTagText $ tt of
-        Nothing -> False
-        Just (_, rest) -> not . LC.any isAlpha $ rest
+    extractSingle rowTag = (getHotdogs rowTag, getName rowTag)
+    getName = tts2text . getCell 1
+    getHotdogs = tts2integral . getCell 20
 
 getCell :: Int -> [Tag L.ByteString] -> [Tag L.ByteString]
 getCell 0 = dropWhile (~/= ("<td>" :: String))
