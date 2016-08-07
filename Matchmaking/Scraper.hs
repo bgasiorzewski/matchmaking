@@ -30,7 +30,7 @@ import Matchmaking.Common
 import Matchmaking.DB
 
 usScrapeSleep :: Int
-usScrapeSleep = 20 * 1000 * 1000
+usScrapeSleep = 30 * 1000 * 1000
 
 usErrorSleep :: Int
 usErrorSleep = 100 * 1000 * 1000
