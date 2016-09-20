@@ -169,12 +169,12 @@ extractMatch hMatch reg played lbs = Match hMatch played mh ml nh nl reg
     (mh, nh) = last players
     (ml, nl) = head players
     players = sort . map extractSingle $ rowTags
-    entryPoint = dropWhile (~/= ("<td colspan='13'>" :: String)) . parseTags $ lbs
+    entryPoint = dropWhile (~/= ("<td colspan='14'>" :: String)) . parseTags $ lbs
     allTags = sections (~== ("<td class='rgGroupCol'>" :: String)) entryPoint
     rowTags = take 5 allTags ++ take 5 (drop 6 allTags)
     extractSingle rowTag = (getHotdogs rowTag, getName rowTag)
-    getName = tts2text . getCell 1
-    getHotdogs = tts2integral . getCell 20
+    getName = tts2text . getCell 2
+    getHotdogs = tts2integral . getCell 21
 
 getCell :: Int -> [Tag L.ByteString] -> [Tag L.ByteString]
 getCell 0 = dropWhile (~/= ("<td>" :: String))
