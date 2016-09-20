@@ -19,4 +19,4 @@ echo 'EU players (should be 500):'
 < input/eu sort | uniq | wc
 
 echo 'Total (should be 1000):'
-cat input/na input/eu | uniq | wc
+cat input/na input/eu | sort | uniq | wc
