@@ -12,7 +12,7 @@ import qualified Text.Blaze.Html5.Attributes as A
 import Matchmaking.Common
 
 threshold :: Double
-threshold = 0.3
+threshold = 0.35
 
 answer :: Int -> Int -> Html
 answer _ 0 = H.p "DUNNO... the website is broken" ! A.id "answer"
