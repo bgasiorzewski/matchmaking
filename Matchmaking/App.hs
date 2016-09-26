@@ -47,7 +47,6 @@ answer np na
 rootApp :: ActionM ()
 rootApp = do
     (nPotato, nAll) <- liftIO $ readIORef mmStats
-    setHeader "Refresh" "300"
     html $ renderHtml $ H.docTypeHtml ! A.lang "en" $ do
         H.head $ do
             H.title "Is Matchmaking Fixed Yet?"
